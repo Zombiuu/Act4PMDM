@@ -57,7 +57,8 @@ public class SecondActivityEvents implements OnMapReadyCallback, FireBaseAdminLi
     @Override
     public void fireBaseDownloadBranch(String branch, DataSnapshot dataSnapshot) {
         removeOldPins();
-        GenericTypeIndicator<ArrayList<Locations>> indicator = new GenericTypeIndicator<ArrayList<Locations>>() { };
+        GenericTypeIndicator<ArrayList<Locations>> indicator = new GenericTypeIndicator<ArrayList<Locations>>() {
+        };
         location = dataSnapshot.getValue(indicator);
         addPins();
 
@@ -109,20 +110,21 @@ public class SecondActivityEvents implements OnMapReadyCallback, FireBaseAdminLi
     public boolean onMarkerClick(Marker marker) {
 
 
+        Locations location = (Locations) marker.getTag();
 
-            Locations location = (Locations) marker.getTag();
-
-            secondActivity.mapDetailFragment.txtName.setText("Nombre: "+location.name);
-            secondActivity.mapDetailFragment.txtPob.setText("Población: "+location.poblation+"");
-            secondActivity.mapDetailFragment.txtCountry.setText("País: "+location.country);
-            FragmentTransaction transaction = secondActivity.getSupportFragmentManager().beginTransaction();
-            transaction.show(secondActivity.mapDetailFragment);
-            transaction.commit();
+        secondActivity.mapDetailFragment.txtName.setText("Nombre: " + location.name);
+        secondActivity.mapDetailFragment.txtPob.setText("Población: " + location.poblation + "");
+        secondActivity.mapDetailFragment.txtCountry.setText("País: " + location.country);
+        FragmentTransaction transaction = secondActivity.getSupportFragmentManager().beginTransaction();
+        transaction.show(secondActivity.mapDetailFragment);
+        transaction.commit();
 
 
         return false;
     }
 
+
+    // usamos este metodo para esconder el fragment de los detalles al pulsar en algo que no sea un pin
     @Override
     public void onMapClick(LatLng latLng) {
 

@@ -12,6 +12,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by ramsesdiezgalvan on 30/11/17.
  */
@@ -113,5 +116,24 @@ public class FireBaseAdmin {
 
         this.fireBaseAdminListener = fireBaseAdminListener;
 
+    }
+
+    public void insertBranch(String ruteBranch, Map<String,Object> valores){
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(ruteBranch, valores);
+        myRef.updateChildren(childUpdates);
+
+    }
+    public void insertMultiBranch( Map<String, Object> ruteBranchValue){
+
+
+        myRef.updateChildren(ruteBranchValue);
+
+    }
+
+    public String generatorKeyBranch(String sRuteBranch){
+
+
+        return   myRef.child(sRuteBranch).push().getKey();
     }
 }
