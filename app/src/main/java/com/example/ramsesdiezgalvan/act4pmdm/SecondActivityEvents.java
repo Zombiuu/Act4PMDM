@@ -1,10 +1,12 @@
 package com.example.ramsesdiezgalvan.act4pmdm;
 
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
 import com.example.ramsesdiezgalvan.act4pmdm.entity.Locations;
 import com.example.ramsesdiezgalvan.act4pmdm.firebase.FireBaseAdmin;
 import com.example.ramsesdiezgalvan.act4pmdm.firebase.FireBaseAdminListener;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -20,7 +22,7 @@ import java.util.ArrayList;
  * Created by ramsesdiezgalvan on 11/1/18.
  */
 
-public class SecondActivityEvents implements OnMapReadyCallback, FireBaseAdminListener, GoogleMap.OnMarkerClickListener {
+public class SecondActivityEvents implements OnMapReadyCallback, FireBaseAdminListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
 
     SecondActivity secondActivity;
@@ -28,7 +30,7 @@ public class SecondActivityEvents implements OnMapReadyCallback, FireBaseAdminLi
     FireBaseAdmin fireBaseAdmin;
     ArrayList<Locations> location;
 
-    SecondActivityEvents(SecondActivity secondActivity){
+    SecondActivityEvents(SecondActivity secondActivity) {
         this.secondActivity = secondActivity;
     }
 
@@ -38,6 +40,7 @@ public class SecondActivityEvents implements OnMapReadyCallback, FireBaseAdminLi
 
         mMap = googleMap;
         mMap.setOnMarkerClickListener(this);
+        mMap.setOnMapClickListener(this);
         secondActivity.fireBaseAdmin.downAndObserveBranch("Locations");
     }
 
@@ -53,40 +56,80 @@ public class SecondActivityEvents implements OnMapReadyCallback, FireBaseAdminLi
 
     @Override
     public void fireBaseDownloadBranch(String branch, DataSnapshot dataSnapshot) {
-        GenericTypeIndicator<ArrayList<Locations>> indicator = new GenericTypeIndicator<ArrayList<Locations>>() {
-        };
+        removeOldPins();
+        GenericTypeIndicator<ArrayList<Locations>> indicator = new GenericTypeIndicator<ArrayList<Locations>>() { };
         location = dataSnapshot.getValue(indicator);
         addPins();
 
     }
 
-    public void removeOldPins(){
-        for (int i = 0;i<location.size();i++){
-            Locations locationTemp = location.get(i);
-            if(locationTemp!=null){
+    public void removeOldPins() {
 
+        if (location != null) {
+            for (int i = 0; i < location.size(); i++) {
+                Locations locationTemp = location.get(i);
+                if (locationTemp.getMarker() != null) {
+                    locationTemp.getMarker().remove();
+                }
             }
         }
+
     }
 
-    public void addPins(){
-        for (int i = 0;i<location.size();i++){
+    // metodo para añadir pins de la base de datos
+    public void addPins() {
+        for (int i = 0; i < location.size(); i++) {
 
             Locations locationTemp = location.get(i);
-            System.out.println("Location lat: "+locationTemp.lat);
-            System.out.println("Location lon: "+locationTemp.lon);
-            System.out.println("Location name: "+locationTemp.name);
+            System.out.println("Location lat: " + locationTemp.lat);
+            System.out.println("Location lon: " + locationTemp.lon);
+            System.out.println("Location name: " + locationTemp.name);
             LatLng locationPos = new LatLng(locationTemp.lat, locationTemp.lon);
-            mMap.addMarker(new MarkerOptions().position(locationPos).title(locationTemp.name)).setTag(locationTemp);
 
-            // mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(locationPos);
+            markerOptions.title(locationTemp.name);
+
+            if (mMap != null) {
+                Marker marker = mMap.addMarker(markerOptions);
+                marker.setTag(locationTemp);
+                locationTemp.setMarker(marker);
+            }
+
+
+            // hace zoom en el primero pin que se añade al mapa, 10 es el tamaño del zoom
+            if (i == 0) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationPos, 10));
+
+
         }
     }
+
     //metodo que detecta si un pin esta clickado
     @Override
     public boolean onMarkerClick(Marker marker) {
 
-        Locations location = (Locations) marker.getTag();
+
+
+            Locations location = (Locations) marker.getTag();
+
+            secondActivity.mapDetailFragment.txtName.setText("Nombre: "+location.name);
+            secondActivity.mapDetailFragment.txtPob.setText("Población: "+location.poblation+"");
+            secondActivity.mapDetailFragment.txtCountry.setText("País: "+location.country);
+            FragmentTransaction transaction = secondActivity.getSupportFragmentManager().beginTransaction();
+            transaction.show(secondActivity.mapDetailFragment);
+            transaction.commit();
+
+
         return false;
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+
+        System.out.print("Click en el mapa");
+        FragmentTransaction transaction = secondActivity.getSupportFragmentManager().beginTransaction();
+        transaction.hide(secondActivity.mapDetailFragment);
+        transaction.commit();
+
     }
 }
