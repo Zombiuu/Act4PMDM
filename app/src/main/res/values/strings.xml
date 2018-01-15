@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Act4PMDM</string>
+    <string name="txtUser">User</string>
+    <string name="txtPass">Password</string>
+    <string name="btnGo">Go</string>
+    <string name="title_activity_maps">Map</string>
+</resources>
